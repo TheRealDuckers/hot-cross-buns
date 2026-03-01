@@ -1,4 +1,6 @@
-// app.js
+// ------------------------------
+// Firebase imports
+// ------------------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
@@ -16,7 +18,9 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// 1. Firebase config (replace with your own)
+// ------------------------------
+// Firebase config 
+// ------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyB9Vi7Qwm9_COJBSO6i2Gi78lxGB87zPRQ",
   authDomain: "greater-guitar.firebaseapp.com",
@@ -30,15 +34,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
 const bunsCol = collection(db, "buns");
 
-// 2. DOM elements
+// ------------------------------
+// DOM elements
+// ------------------------------
+const adminShield = document.getElementById("adminShield");
+const adminLoginCard = document.getElementById("adminLoginCard");
+
 const loginForm = document.getElementById("loginForm");
 const loginStatus = document.getElementById("loginStatus");
+
 const toggleAdminBtn = document.getElementById("toggleAdminBtn");
 const adminSection = document.getElementById("adminSection");
 const bunForm = document.getElementById("bunForm");
+
 const leaderboardEl = document.getElementById("leaderboard");
 const emptyStateEl = document.getElementById("emptyState");
 
@@ -54,18 +64,20 @@ const modalPriceBun = document.getElementById("modalPriceBun");
 const modalPack = document.getElementById("modalPack");
 const modalShareBtn = document.getElementById("modalShareBtn");
 
-let adminVisible = false;
 let currentBuns = [];
 let currentModalBun = null;
+let adminVisible = false;
 
-// 3. Helpers
-function num(value) {
-  const n = parseFloat(value);
+// ------------------------------
+// Helpers
+// ------------------------------
+function num(v) {
+  const n = parseFloat(v);
   return isNaN(n) ? 0 : n;
 }
 
 function bunIdFromName(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
 function bunShareUrl(id) {
@@ -73,9 +85,20 @@ function bunShareUrl(id) {
   return `${base}#hcb=${encodeURIComponent(id)}`;
 }
 
-// 4. Admin login
+// ------------------------------
+// Floating shield toggles login
+// ------------------------------
+adminShield.addEventListener("click", () => {
+  adminLoginCard.style.display =
+    adminLoginCard.style.display === "block" ? "none" : "block";
+});
+
+// ------------------------------
+// Admin login
+// ------------------------------
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
 
@@ -89,16 +112,20 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// 5. Check admin UID from Firestore
+// ------------------------------
+// Check admin UID from Firestore
+// ------------------------------
 async function checkAdmin(uid) {
-  const adminDocRef = doc(db, "config", "admins");
-  const snap = await getDoc(adminDocRef);
-  if (!snap.exists()) return false;
-  const data = snap.data();
+  const adminDoc = await getDoc(doc(db, "config", "admins"));
+  if (!adminDoc.exists()) return false;
+
+  const data = adminDoc.data();
   return Array.isArray(data.uids) && data.uids.includes(uid);
 }
 
-// 6. Auth state listener
+// ------------------------------
+// Auth state listener
+// ------------------------------
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     toggleAdminBtn.style.display = "none";
@@ -108,7 +135,6 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  loginStatus.textContent = "Signed in. Checking admin access…";
   const isAdmin = await checkAdmin(user.uid);
 
   if (isAdmin) {
@@ -122,13 +148,17 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// 7. Admin panel toggle
+// ------------------------------
+// Admin panel toggle
+// ------------------------------
 toggleAdminBtn.addEventListener("click", () => {
   adminVisible = !adminVisible;
   adminSection.style.display = adminVisible ? "block" : "none";
 });
 
-// 8. Save / update bun
+// ------------------------------
+// Save / update bun
+// ------------------------------
 bunForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -146,12 +176,10 @@ bunForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  const totalScore = taste + texture + crossNeatness + fruitContent;
   const id = bunIdFromName(name);
+  const totalScore = taste + texture + crossNeatness + fruitContent;
 
-  const bunDoc = doc(bunsCol, id);
-
-  await setDoc(bunDoc, {
+  await setDoc(doc(bunsCol, id), {
     id,
     name,
     taste,
@@ -168,7 +196,9 @@ bunForm.addEventListener("submit", async (e) => {
   bunForm.reset();
 });
 
-// 9. Live leaderboard
+// ------------------------------
+// Live leaderboard
+// ------------------------------
 const q = query(bunsCol, orderBy("totalScore", "desc"), orderBy("updatedAt", "asc"));
 
 onSnapshot(q, (snapshot) => {
@@ -176,10 +206,12 @@ onSnapshot(q, (snapshot) => {
   snapshot.forEach((docSnap) => buns.push({ ...docSnap.data() }));
   currentBuns = buns;
   renderLeaderboard(buns);
-  checkHashForBun(); // if someone opened via share link
+  checkHashForBun();
 });
 
-// 10. Render leaderboard
+// ------------------------------
+// Render leaderboard
+// ------------------------------
 function renderLeaderboard(buns) {
   leaderboardEl.innerHTML = "";
 
@@ -195,7 +227,8 @@ function renderLeaderboard(buns) {
     li.dataset.id = bun.id;
 
     const left = document.createElement("div");
-    left.className = "lb-left";
+    left.style.display = "flex";
+    left.style.alignItems = "center";
 
     const rank = document.createElement("div");
     rank.className = "rank-pill";
@@ -211,9 +244,7 @@ function renderLeaderboard(buns) {
 
     const subEl = document.createElement("div");
     subEl.className = "bun-sub";
-    subEl.textContent = `Taste ${bun.taste.toFixed(1)} · Texture ${bun.texture.toFixed(
-      1
-    )}`;
+    subEl.textContent = `Taste ${bun.taste.toFixed(1)} · Texture ${bun.texture.toFixed(1)}`;
 
     textWrap.appendChild(nameEl);
     textWrap.appendChild(subEl);
@@ -222,7 +253,9 @@ function renderLeaderboard(buns) {
     left.appendChild(textWrap);
 
     const right = document.createElement("div");
-    right.className = "lb-score-wrap";
+    right.style.display = "flex";
+    right.style.alignItems = "center";
+    right.style.gap = "0.5rem";
 
     const scoreEl = document.createElement("div");
     scoreEl.className = "lb-score";
@@ -230,8 +263,7 @@ function renderLeaderboard(buns) {
 
     const shareBtn = document.createElement("button");
     shareBtn.className = "btn-share";
-    shareBtn.type = "button";
-    shareBtn.innerHTML = `<span>📤</span><span>Share</span>`;
+    shareBtn.textContent = "📤";
     shareBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       shareBun(bun);
@@ -249,9 +281,12 @@ function renderLeaderboard(buns) {
   });
 }
 
-// 11. Modal logic
+// ------------------------------
+// Modal
+// ------------------------------
 function openModal(bun) {
   currentModalBun = bun;
+
   modalTitle.textContent = bun.name;
   modalTotal.textContent = bun.totalScore.toFixed(1);
   modalTaste.textContent = bun.taste.toFixed(1);
@@ -260,9 +295,7 @@ function openModal(bun) {
   modalFruit.textContent = bun.fruitContent.toFixed(1);
 
   modalPriceBun.textContent =
-    bun.pricePerBun != null && bun.pricePerBun !== 0
-      ? `£${bun.pricePerBun.toFixed(2)}`
-      : "—";
+    bun.pricePerBun ? `£${bun.pricePerBun.toFixed(2)}` : "—";
 
   if (bun.packSize && bun.pricePerPack) {
     modalPack.textContent = `${bun.packSize} for £${bun.pricePerPack.toFixed(2)}`;
@@ -288,50 +321,40 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeModal();
 });
 
-// 12. Share logic
+// ------------------------------
+// Share logic
+// ------------------------------
 async function shareBun(bun) {
   const url = bunShareUrl(bun.id);
-  const text = `Check out this Hot Cross Bun: ${bun.name} (score ${bun.totalScore.toFixed(
-    1
-  )})`;
+  const text = `Check out this Hot Cross Bun: ${bun.name} (score ${bun.totalScore.toFixed(1)})`;
 
   if (navigator.share) {
     try {
-      await navigator.share({
-        title: "Hot Cross Bun Showdown",
-        text,
-        url
-      });
-    } catch (e) {
-      // user cancelled, ignore
-    }
+      await navigator.share({ title: "Hot Cross Bun Showdown", text, url });
+    } catch {}
   } else {
-    try {
-      await navigator.clipboard.writeText(url);
-      alert("Share link copied to clipboard:\n" + url);
-    } catch {
-      alert("Share link:\n" + url);
-    }
+    await navigator.clipboard.writeText(url);
+    alert("Share link copied:\n" + url);
   }
 }
 
 modalShareBtn.addEventListener("click", () => {
-  if (currentModalBun) {
-    shareBun(currentModalBun);
-  }
+  if (currentModalBun) shareBun(currentModalBun);
 });
 
-// 13. Handle #hcb=... links
+// ------------------------------
+// Handle share links (#hcb=...)
+// ------------------------------
 function getHashBunId() {
-  const hash = window.location.hash || "";
+  const hash = window.location.hash;
   const match = hash.match(/#hcb=([^&]+)/i);
-  if (!match) return null;
-  return decodeURIComponent(match[1]);
+  return match ? decodeURIComponent(match[1]) : null;
 }
 
 function checkHashForBun() {
   const id = getHashBunId();
   if (!id || !currentBuns.length) return;
+
   const bun = currentBuns.find((b) => b.id === id);
   if (bun) openModal(bun);
 }
