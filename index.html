@@ -15,25 +15,23 @@
         <span>Hot Cross Bun Showdown</span>
       </div>
       <h1>Battle of the Buns</h1>
-      <p>Rate taste, texture, cross neatness & fruitiness. Watch the buns climb the leaderboard!</p>
+      <p>Visitors can explore the leaderboard — judges tap the shield to sign in.</p>
     </header>
 
-    <!-- Admin login -->
-    <section class="card">
+    <!-- Hidden admin login -->
+    <section id="adminLoginCard" class="card" style="display:none;">
       <div class="card-header">
-        <div>
-          <h2>Admin sign in</h2>
-          <div class="badge">Judges only</div>
-        </div>
+        <h2>Admin sign in</h2>
+        <div class="badge">Judges only</div>
       </div>
 
       <form id="loginForm" class="stack">
         <div class="field">
-          <label for="loginEmail">Email</label>
+          <label>Email</label>
           <input id="loginEmail" type="email" required placeholder="judge@bakery.com" />
         </div>
         <div class="field">
-          <label for="loginPassword">Password</label>
+          <label>Password</label>
           <input id="loginPassword" type="password" required placeholder="••••••••" />
         </div>
         <button class="btn-primary" type="submit">
@@ -46,10 +44,8 @@
     <!-- Admin panel -->
     <section class="card">
       <div class="card-header">
-        <div>
-          <h2>Admin panel</h2>
-          <div class="badge">Add & update buns</div>
-        </div>
+        <h2>Admin panel</h2>
+        <div class="badge">Add & update buns</div>
         <button id="toggleAdminBtn" class="toggle-admin" style="display:none;">
           <span>⚙️</span> Panel
         </button>
@@ -59,101 +55,43 @@
         <form id="bunForm" class="stack">
           <div class="grid">
             <div class="field">
-              <label for="name">Bun name</label>
+              <label>Bun name</label>
               <input id="name" type="text" required placeholder="Sainsbury's Bakery" />
-              <div class="hint">This becomes the share link ID.</div>
             </div>
 
             <div class="field">
-              <label for="taste">Taste</label>
-              <input
-                id="taste"
-                type="number"
-                inputmode="decimal"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0–10"
-                required
-              />
+              <label>Taste</label>
+              <input id="taste" type="number" inputmode="decimal" step="0.1" min="0" max="10" required />
             </div>
 
             <div class="field">
-              <label for="texture">Texture</label>
-              <input
-                id="texture"
-                type="number"
-                inputmode="decimal"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0–10"
-                required
-              />
+              <label>Texture</label>
+              <input id="texture" type="number" inputmode="decimal" step="0.1" min="0" max="10" required />
             </div>
 
             <div class="field">
-              <label for="crossNeatness">Cross neatness</label>
-              <input
-                id="crossNeatness"
-                type="number"
-                inputmode="decimal"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0–10"
-                required
-              />
+              <label>Cross neatness</label>
+              <input id="crossNeatness" type="number" inputmode="decimal" step="0.1" min="0" max="10" required />
             </div>
 
             <div class="field">
-              <label for="fruitContent">Fruit content</label>
-              <input
-                id="fruitContent"
-                type="number"
-                inputmode="decimal"
-                step="0.1"
-                min="0"
-                max="10"
-                placeholder="0–10"
-                required
-              />
+              <label>Fruit content</label>
+              <input id="fruitContent" type="number" inputmode="decimal" step="0.1" min="0" max="10" required />
             </div>
 
             <div class="field">
-              <label for="pricePerBun">Price per bun (£)</label>
-              <input
-                id="pricePerBun"
-                type="number"
-                inputmode="decimal"
-                step="0.01"
-                min="0"
-                placeholder="1.20"
-              />
+              <label>Price per bun (£)</label>
+              <input id="pricePerBun" type="number" inputmode="decimal" step="0.01" min="0" />
             </div>
 
             <div class="field">
-              <label for="packSize">Pack size</label>
-              <input
-                id="packSize"
-                type="number"
-                inputmode="numeric"
-                step="1"
-                min="1"
-                placeholder="4"
-              />
+              <label>Pack size</label>
+              <input id="packSize" type="number" inputmode="numeric" step="1" min="1" />
             </div>
 
             <div class="field">
-              <label for="pricePerPack">Price per pack (£)</label>
-              <input
-                id="pricePerPack"
-                type="number"
-                inputmode="decimal"
-                step="0.01"
-                min="0"
-                placeholder="3.50"
-              />
+              <label>Price per pack (£)</label>
+              <input id="pricePerPack" type="number" inputmode="decimal" step="0.01" min="0" />
             </div>
           </div>
 
@@ -167,18 +105,19 @@
     <!-- Leaderboard -->
     <section class="card">
       <div class="card-header">
-        <div>
-          <h2>Leaderboard</h2>
-          <div class="badge">Tap a bun for details · Share your favourite!</div>
-        </div>
+        <h2>Leaderboard</h2>
+        <div class="badge">Tap a bun for details · Share your favourite!</div>
       </div>
 
       <ul id="leaderboard" class="leaderboard-list"></ul>
       <div id="emptyState" class="empty-state">
-        No buns yet. Once the judges add some, they’ll rise like perfect dough.
+        No buns yet — once judges add some, they’ll rise like perfect dough.
       </div>
     </section>
   </div>
+
+  <!-- Floating admin shield -->
+  <button id="adminShield" class="admin-shield">🛡️</button>
 
   <!-- Modal -->
   <div id="modalBackdrop" class="modal-backdrop">
@@ -188,44 +127,26 @@
           <span class="modal-emoji">🥯</span>
           <h3 id="modalTitle"></h3>
         </div>
-        <button class="modal-close" id="modalCloseBtn" aria-label="Close">×</button>
+        <button class="modal-close" id="modalCloseBtn">×</button>
       </div>
+
       <div class="modal-body">
         <div class="modal-row big-score">
           <div class="modal-label">Total score</div>
           <div class="modal-value" id="modalTotal"></div>
         </div>
 
-        <div class="modal-row">
-          <div class="modal-label">Taste</div>
-          <div class="modal-value" id="modalTaste"></div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-label">Texture</div>
-          <div class="modal-value" id="modalTexture"></div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-label">Cross neatness</div>
-          <div class="modal-value" id="modalCross"></div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-label">Fruit content</div>
-          <div class="modal-value" id="modalFruit"></div>
-        </div>
+        <div class="modal-row"><div class="modal-label">Taste</div><div class="modal-value" id="modalTaste"></div></div>
+        <div class="modal-row"><div class="modal-label">Texture</div><div class="modal-value" id="modalTexture"></div></div>
+        <div class="modal-row"><div class="modal-label">Cross neatness</div><div class="modal-value" id="modalCross"></div></div>
+        <div class="modal-row"><div class="modal-label">Fruit content</div><div class="modal-value" id="modalFruit"></div></div>
 
-        <div class="modal-row">
-          <div class="modal-label">Price per bun</div>
-          <div class="modal-value" id="modalPriceBun"></div>
-        </div>
-        <div class="modal-row">
-          <div class="modal-label">Pack</div>
-          <div class="modal-value" id="modalPack"></div>
-        </div>
+        <div class="modal-row"><div class="modal-label">Price per bun</div><div class="modal-value" id="modalPriceBun"></div></div>
+        <div class="modal-row"><div class="modal-label">Pack</div><div class="modal-value" id="modalPack"></div></div>
       </div>
+
       <div class="modal-footer">
-        <button id="modalShareBtn" class="btn-share-inline">
-          <span>📤</span> Share this bun
-        </button>
+        <button id="modalShareBtn" class="btn-share-inline">📤 Share this bun</button>
         <div class="modal-footer-hint">Tap outside or × to close</div>
       </div>
     </div>
